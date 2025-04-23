@@ -1,37 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import Phaser from "phaser";
-
-// A minimal “Scene” to initialize Phaser
-class BootScene extends Phaser.Scene {
-  constructor() {
-    super({ key: "BootScene" });
-  }
-  preload() {
-    // here’s where you’d load assets later
-    this.load.tilemapTiledJSON("map", "assets/map.json");
-    this.load.image("tiles", "assets/tileset.png");
-    this.load.image("player", "assets/player.png"),
-      {
-        frameWidth: 32,
-        frameHeight: 32,
-      };
-  }
-  create() {
-    // switch to main scene once booted (we’ll add MainScene soon)
-    this.scene.start("MainScene");
-  }
-}
-
-// A placeholder main scene
-class MainScene extends Phaser.Scene {
-  constructor() {
-    super({ key: "MainScene" });
-  }
-  create() {
-    // draw a simple rectangle so we know it’s working
-    this.add.rectangle(400, 300, 200, 100, 0x00ff00);
-  }
-}
+import BootScene from "../game/scenes/BootScene";
+import MainScene from "../game/scenes/MainScene";
+import BattleScene from "../game/scenes/BattleScene";
 
 export default function Game() {
   const gameContainer = useRef(null);
@@ -41,14 +12,24 @@ export default function Game() {
       type: Phaser.AUTO,
       width: 800,
       height: 600,
-      parent: gameContainer.current, // mount point
-      scene: [BootScene, MainScene],
-      backgroundColor: "#87ceeb", // sky‐blue background
+      parent: gameContainer.current,
+      scene: [BootScene, MainScene, BattleScene],
+      backgroundColor: "#87ceeb",
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 },
+          debug: false
+        }
+      },
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+      }
     };
 
     const game = new Phaser.Game(config);
 
-    // clean up on unmount
     return () => {
       game.destroy(true);
     };
@@ -57,7 +38,12 @@ export default function Game() {
   return (
     <div
       ref={gameContainer}
-      style={{ width: 800, height: 600, margin: "0 auto", display: "block" }}
+      style={{ 
+        width: '100%', 
+        height: '100vh', 
+        margin: '0 auto', 
+        display: 'block' 
+      }}
     />
   );
 }
